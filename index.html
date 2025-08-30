@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype.Re</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(ellipse at top, #000000 0%, #0a0a0a 25%, #111111 50%, #000000 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            z-index: 1000;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .header h1 {
+            font-family: 'Abril Fatface', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 25%, #ffffff 50%, #e0e0e0 75%, #ffffff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            animation: shimmer 3s infinite ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .main-container {
+            margin-top: 120px;
+            padding: 3rem 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            margin-bottom: 4rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .upload-section:hover::before {
+            opacity: 1;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(255, 255, 255, 0.03);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 4rem 3rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .upload-area::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover::after {
+            opacity: 1;
+        }
+
+        .upload-area:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .upload-area:hover .upload-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            transition: color 0.6s ease;
+        }
+
+        .upload-area:hover .upload-text {
+            color: #ffffff;
+        }
+
+        .upload-subtext {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.95rem;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            color: #000000;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 15px 30px rgba(255, 255, 255, 0.1),
+                0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .media-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            position: relative;
+        }
+
+        .media-item::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.05));
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .media-item:hover::before {
+            opacity: 1;
+        }
+
+        .media-item:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(255, 255, 255, 0.02);
+        }
+
+        .media-content {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+
+        .media-content img,
+        .media-content video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .media-content:hover img,
+        .media-content:hover video {
+            transform: scale(1.08);
+        }
+
+        .media-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            padding: 2.5rem;
+            transform: translateY(100%);
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .media-item:hover .media-overlay {
+            transform: translateY(0);
+        }
+
+        .media-info {
+            padding: 2rem;
+        }
+
+        .media-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .media-time {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.01em;
+        }
+
+        .comments-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50px;
+            padding: 1rem 1.8rem;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .comment-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: #000000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+        }
+
+        .comment {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.8rem;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .comment:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .comment-author {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.01em;
+        }
+
+        .comment-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+
+        .loading {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 3rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-container {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .preview-container h3 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .preview-item {
+            display: inline-block;
+            margin: 0.8rem;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .preview-item:hover {
+            transform: scale(1.05);
+        }
+
+        .preview-item img,
+        .preview-item video {
+            max-width: 220px;
+            max-height: 160px;
+            border-radius: 16px;
+            transition: all 0.6s ease;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .preview-remove:hover {
+            background: rgba(255, 59, 59, 0.9);
+            transform: scale(1.1);
+        }dc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .preview-item {
+            display: inline-block;
+            margin: 0.5rem;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-item img,
+        .preview-item video {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 10px;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 107, 107, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PROTOTYPE.RE</h1>
+    </div>
+
+    <div class="main-container">
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop files here or click to upload</div>
+                <div class="upload-subtext">Support for images and videos • 16:9 optimized</div>
+            </div>
+            <input type="file" id="fileInput" class="file-input" multiple accept="image/*,video/*">
+            
+            <div id="previewContainer" class="preview-container" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #4ecdc4;">Preview</h3>
+                <div id="previewItems"></div>
+                <button class="btn" onclick="uploadFiles()" style="margin-top: 1rem;">Upload Files</button>
+            </div>
+        </div>
+
+        <div id="mediaGrid" class="media-grid">
+            <!-- Media items will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // Simple in-memory storage (simulating backend)
+        let mediaItems = [];
+        let fileQueue = [];
+
+        // Initialize with some sample content
+        function initializeSampleContent() {
+            const sampleItems = [
+                {
+                    id: 1,
+                    type: 'image',
+                    src: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#4ecdc4;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <rect width="800" height="450" fill="url(#grad1)"/>
+                            <text x="400" y="225" fill="white" text-anchor="middle" font-size="36" font-family="Arial">Sample Image</text>
+                        </svg>
+                    `),
+                    title: 'Sample Cinematic Shot',
+                    timestamp: new Date().toLocaleString(),
+                    comments: [
+                        { author: 'Director', text: 'Perfect framing and composition!' },
+                        { author: 'Producer', text: 'This captures the mood beautifully.' }
+                    ]
+                },
+                {
+                    id: 2,
+                    type: 'image',
+                    src: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#45b7d1;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <rect width="800" height="450" fill="url(#grad2)"/>
+                            <text x="400" y="225" fill="white" text-anchor="middle" font-size="36" font-family="Arial">Demo Video Frame</text>
+                        </svg>
+                    `),
+                    title: 'Behind the Scenes',
+                    timestamp: new Date().toLocaleString(),
+                    comments: [
+                        { author: 'DP', text: 'Great lighting setup here.' }
+                    ]
+                }
+            ];
+            
+            mediaItems = [...sampleItems];
+            renderMediaGrid();
+        }
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4ecdc4';
+            uploadArea.style.background = 'rgba(78, 205, 196, 0.1)';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            uploadArea.style.background = 'transparent';
+            
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            fileQueue = [];
+            const previewContainer = document.getElementById('previewContainer');
+            const previewItems = document.getElementById('previewItems');
+            
+            previewItems.innerHTML = '';
+            
+            if (files.length === 0) {
+                previewContainer.style.display = 'none';
+                return;
+            }
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    fileQueue.push(file);
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        
+                        let mediaElement;
+                        if (file.type.startsWith('image/')) {
+                            mediaElement = document.createElement('img');
+                        } else {
+                            mediaElement = document.createElement('video');
+                            mediaElement.controls = true;
+                        }
+                        
+                        mediaElement.src = e.target.result;
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'preview-remove';
+                        removeBtn.innerHTML = '×';
+                        removeBtn.onclick = () => removeFromQueue(index);
+                        
+                        previewItem.appendChild(mediaElement);
+                        previewItem.appendChild(removeBtn);
+                        previewItems.appendChild(previewItem);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            previewContainer.style.display = 'block';
+        }
+
+        function removeFromQueue(index) {
+            fileQueue.splice(index, 1);
+            if (fileQueue.length === 0) {
+                document.getElementById('previewContainer').style.display = 'none';
+            } else {
+                handleFiles(fileQueue);
+            }
+        }
+
+        function uploadFiles() {
+            if (fileQueue.length === 0) return;
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="spinner"></div><br>Uploading files...';
+            document.getElementById('mediaGrid').appendChild(loadingDiv);
+            
+            // Simulate upload delay
+            setTimeout(() => {
+                fileQueue.forEach((file) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const mediaItem = {
+                            id: Date.now() + Math.random(),
+                            type: file.type.startsWith('image/') ? 'image' : 'video',
+                            src: e.target.result,
+                            title: file.name,
+                            timestamp: new Date().toLocaleString(),
+                            comments: []
+                        };
+                        
+                        mediaItems.unshift(mediaItem);
+                        renderMediaGrid();
+                    };
+                    reader.readAsDataURL(file);
+                });
+                
+                // Clear the queue and hide preview
+                fileQueue = [];
+                document.getElementById('previewContainer').style.display = 'none';
+                document.getElementById('fileInput').value = '';
+                
+                // Remove loading indicator
+                loadingDiv.remove();
+            }, 2000);
+        }
+
+        function renderMediaGrid() {
+            const mediaGrid = document.getElementById('mediaGrid');
+            mediaGrid.innerHTML = '';
+            
+            mediaItems.forEach(item => {
+                const mediaElement = createMediaElement(item);
+                mediaGrid.appendChild(mediaElement);
+            });
+        }
+
+        function createMediaElement(item) {
+            const mediaDiv = document.createElement('div');
+            mediaDiv.className = 'media-item';
+            
+            const mediaContent = document.createElement('div');
+            mediaContent.className = 'media-content';
+            
+            let mediaEl;
+            if (item.type === 'image') {
+                mediaEl = document.createElement('img');
+            } else {
+                mediaEl = document.createElement('video');
+                mediaEl.controls = true;
+            }
+            mediaEl.src = item.src;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'media-overlay';
+            overlay.innerHTML = `
+                <div class="media-title">${item.title}</div>
+                <div class="media-time">${item.timestamp}</div>
+            `;
+            
+            mediaContent.appendChild(mediaEl);
+            mediaContent.appendChild(overlay);
+            
+            const mediaInfo = document.createElement('div');
+            mediaInfo.className = 'media-info';
+            
+            const commentsSection = document.createElement('div');
+            commentsSection.className = 'comments-section';
+            
+            const commentForm = document.createElement('div');
+            commentForm.className = 'comment-form';
+            
+            const commentInput = document.createElement('input');
+            commentInput.className = 'comment-input';
+            commentInput.type = 'text';
+            commentInput.placeholder = 'Add a comment...';
+            commentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addComment(item.id, commentInput.value);
+                    commentInput.value = '';
+                }
+            });
+            
+            const commentBtn = document.createElement('button');
+            commentBtn.className = 'comment-btn';
+            commentBtn.innerHTML = '→';
+            commentBtn.onclick = () => {
+                addComment(item.id, commentInput.value);
+                commentInput.value = '';
+            };
+            
+            commentForm.appendChild(commentInput);
+            commentForm.appendChild(commentBtn);
+            
+            const commentsDiv = document.createElement('div');
+            commentsDiv.id = `comments-${item.id}`;
+            
+            // Render existing comments
+            item.comments.forEach(comment => {
+                const commentEl = createCommentElement(comment);
+                commentsDiv.appendChild(commentEl);
+            });
+            
+            commentsSection.appendChild(commentForm);
+            commentsSection.appendChild(commentsDiv);
+            
+            mediaInfo.appendChild(commentsSection);
+            mediaDiv.appendChild(mediaContent);
+            mediaDiv.appendChild(mediaInfo);
+            
+            return mediaDiv;
+        }
+
+        function createCommentElement(comment) {
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+            commentDiv.innerHTML = `
+                <div class="comment-author">${comment.author}</div>
+                <div class="comment-text">${comment.text}</div>
+            `;
+            return commentDiv;
+        }
+
+        function addComment(itemId, text) {
+            if (!text.trim()) return;
+            
+            const item = mediaItems.find(i => i.id === itemId);
+            if (item) {
+                const newComment = {
+                    author: `User${Math.floor(Math.random() * 1000)}`,
+                    text: text.trim()
+                };
+                
+                item.comments.push(newComment);
+                
+                // Update the comments display
+                const commentsDiv = document.getElementById(`comments-${itemId}`);
+                const commentEl = createCommentElement(newComment);
+                commentsDiv.appendChild(commentEl);
+                
+                // Smooth scroll to new comment
+                commentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Initialize the application
+        initializeSampleContent();
+    </script>
+</body>
+</html>
